@@ -1,123 +1,167 @@
 import { timeStamp } from 'console';
 import { Router, Request, Response } from 'express';
+import { TodoList } from './todolist.model';
+import { ITodoListData } from './todolist.model';
+import { StatusCodes } from 'http-status-codes';
 
 const routes = Router()
 
 export default routes;
 
-//Temporary DB
-
-const now = new Date();
-
-let todoListdata = [{
-  id: 1,
-  title: "Learn Express",
-  description: "In order to learn fullstack web development",
-  isCompleted: false,
-  createdAt: now
-}]
-
-let dataId = 1;
-
-interface todoListdata {
-  id: number,
-  title: string,
-  description: string,
-  isCompleted: boolean,
-  createdAt: Date
-}
 
 routes.get('', (req, res) => {
   res.status(200).json({
-    success: true,
+    status: true,
     message: 'SUCCESS FROM API',
   });
 });
 
 //return all items
-routes.get('/all-items', (req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    data: todoListdata,
-  })
+routes.get('/all-items', async (req: Request, res: Response) => {
+  try {
+    const todolist = await TodoList.find().sort({createdAt: -1}).lean()
+    res.status(StatusCodes.OK).json({
+      status: StatusCodes.OK,
+      data: todolist,
+    })
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'error on fetching todolist',
+        error: error
+    })
+  }
 })
 
 //return a single existing item
-routes.get('/search-item/:id', (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
-  const item = todoListdata.find(t => t.id === id)
+routes.get('/search-item/:id', async (req: Request, res: Response) => {
+  try {
+      const { id } = req.params
+      const todoItem = await TodoList.findById({id})
+    // const item = todoListdata.find(t => t.id === id)
+  
+    if (!todoItem){
+      return res.status(StatusCodes.NOT_FOUND).json({
+        status: StatusCodes.NOT_FOUND,
+        message: 'Item Not Found',
+      })
+    }
+  
+    return res.status(StatusCodes.OK).json({
+      status: StatusCodes.OK,
+      data: todoItem,
+    })
 
-  if (!item){
-    return res.status(404).json({
-      success: false,
-      message: 'Item Not Found',
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'error on searching todolist item',
+        error: error
     })
   }
-
-  return res.status(200).json({
-    success: true,
-    id:item.id,
-    data: item,
-  })
 
 })
 
 //create a new item
-routes.post('/create-item', (req: Request, res: Response) => {
-  const {title, description} = req.body;
-
-  if(!title || !description){
-    return res.status(400).json({
-      success: false,
-      message: 'Title or description required!'
+routes.post('/create-item', async (req: Request, res: Response) => {
+  try {
+    const {title, description} = req.body as ITodoListData;
+  
+    if(!title || !description){
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'Title or description required!'
+      })
+    }
+  
+  const newData  = await TodoList.create({
+    title,
+    description
+  })
+  
+  return res.status(StatusCodes.OK).json({
+    status: StatusCodes.OK,
+    data: newData
+  })
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'error on creating todolist item',
+        error: error
     })
   }
-
-const newData : todoListdata = {
-  id: dataId++,
-  title: title,
-  description: description,
-  isCompleted: false,
-  createdAt : new Date()
-}
-
-todoListdata.push(newData);
-
-return res.status(200).json({
-  success: true,
-  data: todoListdata
-})
 
 })
 
 //edit the description in item
 
-routes.patch('/edit-title/:id', (req: Request, res: Response)=> {
-  const { title } = req.body
-  const id = parseInt(req.params.id)
+routes.patch('/edit-title/:id', async (req: Request, res: Response)=> {
+  const { title } = req.body as ITodoListData
+  const  id  = req.params.id
 
-  const newTitle : todoListdata["title"] = title;
-  const itemIndex = todoListdata.findIndex(t => t.id === id)
+  //const newTitle : ITodoListData["title"] = title;
 
-  if(!title){
-    return res.status(404).json({
-      success: false,
-      message: 'Title not found!'
+  try {
+    if(!id){
+      return res.status(StatusCodes.NOT_FOUND).json({
+        status: StatusCodes.NOT_FOUND,
+        message: 'item not found!'
+      })
+    }
+  
+
+    const newTitle = await TodoList.findByIdAndUpdate( id, { title }, {new: true, runValidators: true})
+    
+    if(!newTitle){
+        return res.status(StatusCodes.NOT_FOUND).json({
+            status: StatusCodes.NOT_FOUND,
+            message: 'item not found'
+        })
+    }
+  
+    res.status(StatusCodes.OK).json({
+      status: StatusCodes.OK,
+      message: 'Title Successfully Updated',
+      data: newTitle
+    })
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'error on updating todolist title',
+        error: error
     })
   }
 
-  if(itemIndex === -1){
-    return res.status(404).json({
-      success: false,
-      message: 'item not found!'
+})
+
+//create endpoint for delete
+routes.delete('/delete-item/:id', async (req: Request, res: Response)=>{
+    const id = req.params.id;
+
+    try {
+        if(!id){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: StatusCodes.NOT_FOUND,
+                message: 'item not found!'
+        })
+        }
+        const deletedItem = await TodoList.findByIdAndDelete(id)
+        if (!deletedItem){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: StatusCodes.BAD_REQUEST,
+                message: 'item alreadu deleted!'
+            })
+        }
+        console.log('Deleted Item: ', deletedItem)
+        res.status(StatusCodes.OK).json({
+        status: StatusCodes.OK,
+        message: 'item successfully deleted',
     })
-  }
-
-  todoListdata[itemIndex].title = newTitle
-
-  res.status(200).json({
-    success: true,
-    data: todoListdata[itemIndex]
-  })
-
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'error on deleting todolist item',
+        error: error
+    })
+    }
 })
