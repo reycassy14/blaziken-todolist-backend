@@ -13,7 +13,7 @@ export interface ITodoListDocument extends ITodoListData, Document{}
 //mongoose Schema
 const schema: Schema<ITodoListDocument> = new mongoose.Schema ({
     title: { type: String, requred: [true, 'Title is Required'] },
-    description: { type: String, required: [ true, 'Description is Required'] },
+    description: { type: String, default: '' },
     isCompleted: { type: Boolean, default: false },
     createdAt: {type: Date, default: Date.now}
     
