@@ -67,17 +67,22 @@ routes.post('/create-item', async (req: Request, res: Response) => {
   try {
     const {title, description} = req.body as ITodoListData;
   
-    if(!title || !description){
+    if(!title){
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: StatusCodes.BAD_REQUEST,
-        message: 'Title or description required!'
+        message: 'Title required!'
       })
     }
+
+    
   
-  const newData  = await TodoList.create({
+  const newData  = new TodoList({
     title,
     description
   })
+
+  await newData.save();
+  console.log("field: ", newData)
   
   return res.status(StatusCodes.OK).json({
     status: StatusCodes.OK,
@@ -95,8 +100,8 @@ routes.post('/create-item', async (req: Request, res: Response) => {
 
 //edit the description in item
 
-routes.patch('/edit-title/:id', async (req: Request, res: Response)=> {
-  const { title } = req.body as ITodoListData
+routes.patch('/edit-item/:id', async (req: Request, res: Response)=> {
+  const { title, description } = req.body as ITodoListData
   const  id  = req.params.id
 
   //const newTitle : ITodoListData["title"] = title;
@@ -108,13 +113,25 @@ routes.patch('/edit-title/:id', async (req: Request, res: Response)=> {
         message: 'item not found!'
       })
     }
-  
 
-    const newTitle = await TodoList.findByIdAndUpdate( id, { title }, {new: true, runValidators: true})
+    const updatedFields: Partial<ITodoListData> = {}
+
+    if(title) updatedFields.title = title;
+    if(description) updatedFields.description = description;
+
+    if(Object.keys(updatedFields).length === 0){
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: "update atleast one field"
+      })
+    }
+
+    const updatedItem = await TodoList.findByIdAndUpdate( id, updatedFields , {new: true, runValidators: true})
     
-    if(!newTitle){
+    if(!updatedItem){
         return res.status(StatusCodes.NOT_FOUND).json({
             status: StatusCodes.NOT_FOUND,
+            success: false,
             message: 'item not found'
         })
     }
@@ -122,16 +139,46 @@ routes.patch('/edit-title/:id', async (req: Request, res: Response)=> {
     res.status(StatusCodes.OK).json({
       status: StatusCodes.OK,
       message: 'Title Successfully Updated',
-      data: newTitle
+      data: updatedItem
     })
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({
         status: StatusCodes.BAD_REQUEST,
-        message: 'error on updating todolist title',
+        message: 'error on updating todolist item',
         error: error
     })
   }
 
+})
+
+//update to complete
+
+routes.patch('/update-item/:id', async( req:Request, res: Response)=>{
+  const id = req.params.id;
+
+  try {
+      if(!id){
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: StatusCodes.NOT_FOUND,
+          message: 'item not found!'
+      })
+    }
+
+    const updatedItem = await TodoList.findByIdAndUpdate(id, {isCompleted: true}, {new: true})
+
+    res.status(StatusCodes.OK).json({
+      status: StatusCodes.OK,
+      message: 'Title Successfully Updated',
+      data: updatedItem
+    })
+
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      status: StatusCodes.BAD_REQUEST,
+      message: 'error on updating todolist item',
+      error: error
+  })
+  }
 })
 
 //create endpoint for delete
@@ -149,7 +196,7 @@ routes.delete('/delete-item/:id', async (req: Request, res: Response)=>{
         if (!deletedItem){
             return res.status(StatusCodes.BAD_REQUEST).json({
                 status: StatusCodes.BAD_REQUEST,
-                message: 'item alreadu deleted!'
+                message: 'item already deleted!'
             })
         }
         console.log('Deleted Item: ', deletedItem)
