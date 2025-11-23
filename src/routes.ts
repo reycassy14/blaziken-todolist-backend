@@ -153,22 +153,26 @@ routes.patch('/edit-item/:id', async (req: Request, res: Response)=> {
 
 //update to complete
 
-routes.patch('/update-item/:id', async( req:Request, res: Response)=>{
+routes.patch('/toggle-item/:id', async( req:Request, res: Response)=>{
   const id = req.params.id;
 
   try {
+
+    const currentStatus = await TodoList.findById(id)
+
       if(!id){
         return res.status(StatusCodes.NOT_FOUND).json({
           status: StatusCodes.NOT_FOUND,
+          success: 'false',
           message: 'item not found!'
       })
     }
 
-    const updatedItem = await TodoList.findByIdAndUpdate(id, {isCompleted: true}, {new: true})
+    const updatedItem = await TodoList.findByIdAndUpdate(id, {isCompleted: !currentStatus?.isCompleted}, {new: true})
 
     res.status(StatusCodes.OK).json({
       status: StatusCodes.OK,
-      message: 'Title Successfully Updated',
+      message: `item marked as ${updatedItem?.isCompleted ? 'completed' : 'incomplete'}`,
       data: updatedItem
     })
 
