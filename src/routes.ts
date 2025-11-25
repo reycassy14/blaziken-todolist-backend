@@ -216,3 +216,33 @@ routes.delete('/delete-item/:id', async (req: Request, res: Response)=>{
     })
     }
 })
+
+//delete all completed item
+routes.delete('/batch-delete', async (req: Request, res: Response)=>{
+  try {
+    const completedItems = await TodoList.find({isCompleted: true}).sort({createdAt: -1})
+
+    if(!completedItems.length){
+      console.log('No completed Items')
+      return res.status(StatusCodes.ACCEPTED).json({
+        status: StatusCodes.ACCEPTED,
+        message: 'No Completed Items',
+        data: completedItems
+      })
+    }
+
+    const result = await TodoList.deleteMany({ isCompleted: true })
+
+    res.status(StatusCodes.OK).json({
+      status: StatusCodes.OK,
+      message: `Successfully Deleted ${result.deletedCount} Items` ,
+      deletedItems: completedItems,
+    })
+  } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'error on deleting todolist item',
+        error: error
+    })
+  }
+})
