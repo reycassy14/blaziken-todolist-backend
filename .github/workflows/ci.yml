@@ -4,29 +4,30 @@ on:
   push:
     branches: [ main ]
 
-  pull_request:
-    branches: [ main ]
-
-  workflow_dispatch:
-
 jobs:
   test:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: "STEP 1: Checkout code"
         uses: actions/checkout@v4
       
-      - name: Say hello
-        run: echo "Hello from GitHub Actions!"
-
-      - name: Setup Node
+      - name: "STEP 2: Setup Node.js"
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: install dependencies
-        run: npm ci
-
-      - name: Show installed packages
-        run: npm list --depth=0
+      
+      - name: "STEP 3: Show Node version"
+        run: node --version
+      
+      - name: "STEP 4: Install dependencies"
+        run: npm install
+      
+      - name: "STEP 5: Show current directory"
+        run: pwd
+      
+      - name: "STEP 6: List files"
+        run: ls -la
+      
+      - name: "STEP 7: Show package.json content"
+        run: cat package.json
