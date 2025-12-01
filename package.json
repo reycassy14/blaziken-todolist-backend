@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon"
-  },
+  "test": "echo \"No tests yet\" && exit 0",
+  "build": "tsc",
+  "start": "nodemon"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/reycassy14/blaziken-todolist-backend.git"
