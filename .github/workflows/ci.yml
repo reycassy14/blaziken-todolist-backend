@@ -33,6 +33,13 @@ jobs:
       
       - name: Build TypeScript
         run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build-${{ github.sha }}
+          path: dist/
+          retention-days: 30
       
       - name: Verify build output
         run: |
