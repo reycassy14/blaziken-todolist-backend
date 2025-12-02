@@ -3,10 +3,12 @@ name: Backend CI
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  pull_request:
+    branches: [ main, staging ]
+  workflow_dispatch:
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
     
     steps:
@@ -22,6 +24,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Run linter (future)
+        run: echo "Linting will be added next"
+        continue-on-error: true
+      
       - name: Run tests
         run: npm test
       
@@ -30,12 +36,5 @@ jobs:
       
       - name: Verify build output
         run: |
-          echo "✓ Build completed successfully!"
-          echo ""
-          echo "Checking output directory structure..."
+          echo "✓ Build completed!"
           ls -la dist/
-          echo ""
-          echo "Checking API folder..."
-          ls -la dist/api/
-          echo ""
-          echo "✓ All JavaScript files generated successfully!"

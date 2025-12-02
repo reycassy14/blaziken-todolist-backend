@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "test": "echo \"No tests yet\" && exit 0",
-  "build": "tsc",
-  "start": "nodemon"
-},
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "tsc",
+    "start": "nodemon"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/reycassy14/blaziken-todolist-backend.git"
@@ -23,10 +25,16 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
+    "@types/jest": "^30.0.0",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.2.0",
+    "mongodb-memory-server": "^10.3.0",
     "node": "^25.2.1",
     "nodemon": "^3.1.11",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },

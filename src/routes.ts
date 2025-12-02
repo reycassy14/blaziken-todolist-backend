@@ -20,7 +20,7 @@ routes.get('', (req, res) => {
 routes.get('/all-items', async (req: Request, res: Response) => {
   try {
     const todolist = await TodoList.find().sort({createdAt: -1}).lean()
-    res.status(StatusCodes.OK).json({
+    return res.status(StatusCodes.OK).json({
       status: StatusCodes.OK,
       data: todolist,
     })
