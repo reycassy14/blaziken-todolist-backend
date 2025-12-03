@@ -32,6 +32,22 @@ routes.get('/all-items', async (req: Request, res: Response) => {
     })
   }
 })
+//return all items
+routes.get('/all-items-test', async (req: Request, res: Response) => {
+  try {
+    const todolist = await TodoList.find().sort({createdAt: -1}).lean()
+    return res.status(StatusCodes.OK).json({
+      status: StatusCodes.OK,
+      data: todolist,
+    })
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: 'error on fetching todolist',
+        error: error
+    })
+  }
+})
 
 //return a single existing item
 routes.get('/search-item/:id', async (req: Request, res: Response) => {
