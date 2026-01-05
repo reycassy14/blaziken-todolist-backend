@@ -2,7 +2,7 @@ name: Backend CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, staging ]
   pull_request:
     branches: [ main, staging ]
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
       - name: Run linter (future)
         run: echo "Linting will be added next"
         continue-on-error: true
-      
+
       - name: Run tests
         run: npm test
       
@@ -45,3 +45,19 @@ jobs:
         run: |
           echo "✓ Build completed!"
           ls -la dist/
+  
+  staging-environment:
+  
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: env variables non sensitive
+        env:
+          NODE_ENV: Blaziken ENV
+          PORT: 3000
+          MONGODB_URI: ${{ vars.MONGODB_URI }}
+          MONGODB_NAME: ${{ vars.MONGODB_NAME }}
+        run: |
+         echo "value of mongodb_uri: $MONGODB_URI"
+         echo  "value of mongodb_name: $MONGODB_NAME"
