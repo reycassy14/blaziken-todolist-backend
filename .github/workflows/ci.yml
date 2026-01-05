@@ -58,5 +58,5 @@ jobs:
           MONGODB_URI: ${{ vars.MONGODB_URI }}
           MONGODB_NAME: ${{ vars.MONGODB_NAME }}
         run: |
-         echo "value of mongodb_uri: $MONGODB_URI"
-         echo  "value of mongodb_name: $MONGODB_NAME"
+         echo "value of mongodb_uri: ${{ vars.MONGODB_URI }}"
+         echo  "value of mongodb_name: ${{ vars.MONGODB_NAME }}"
