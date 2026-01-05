@@ -46,7 +46,7 @@ jobs:
           echo "✓ Build completed!"
           ls -la dist/
   
-  staging-environment:
+  Blaziken-ENV:
     runs-on: ubuntu-latest
     environment: Blaziken ENV
     env:
@@ -58,3 +58,8 @@ jobs:
         run: |
          echo "value of mongodb_uri: $MONGODB_URI"
          echo  "value of mongodb_name: $MONGODB_NAME"
+      
+      - name: Debug available variables
+        run: |
+          echo "all env vars:"
+          env | sort
