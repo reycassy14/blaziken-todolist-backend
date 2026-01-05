@@ -2,7 +2,7 @@ name: Backend CI
 
 on:
   push:
-    branches: [ main, staging ]
+    branches: [ main ]
   pull_request:
     branches: [ main, staging ]
   workflow_dispatch:
@@ -47,11 +47,10 @@ jobs:
           ls -la dist/
   
   staging-environment:
-  
-    steps:
-      - name: checkout code
-        uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    environment: Blaziken ENV
 
+    steps:
       - name: env variables non sensitive
         env:
           NODE_ENV: Blaziken ENV
